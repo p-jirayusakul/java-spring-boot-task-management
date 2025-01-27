@@ -19,17 +19,6 @@ WORKDIR /app
 # Copy only the built JAR file from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
-ENV DB_HOST=host.docker.internal
-ENV DB_PORT=5432
-ENV DB_DATABASE=task_management
-ENV DB_USERNAME=postgres
-ENV DB_PASSWORD=1234
-ENV DB_SCHEMA=public
-
-ENV APP_ENV=localhost
-ENV APP_PORT=4000
-ENV ALLOW_ORIGINS=http://localhost:3000
-
 # Expose the port Spring Boot application will run on
 EXPOSE 4000
 
