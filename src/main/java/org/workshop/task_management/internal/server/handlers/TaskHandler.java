@@ -56,7 +56,7 @@ public class TaskHandler {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(id)
+                .buildAndExpand(id.getId())
                 .toUri();
 
         CustomResponse response = CustomResponse.responseSuccess("create task completed", id);
