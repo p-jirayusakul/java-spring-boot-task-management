@@ -72,7 +72,7 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: 1234
       DB_SCHEMA: public
-      APP_ENV: dev
+      APP_ENV: prod
       APP_PORT: 4000
       ALLOW_ORIGINS: http://localhost:3000
       JWT_SECRET: NhfWytDIzKNteB5zChVsYBYL99Yed4Cx

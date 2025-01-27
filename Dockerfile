@@ -10,7 +10,7 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 
 # Build the application (creates JAR file in the "target" directory)
-RUN mvn clean package -DskipTests
+RUN mvn clean package -Pprod -DskipTests
 
 # Use a lightweight JDK image to run the application
 FROM openjdk:23-jdk-slim
