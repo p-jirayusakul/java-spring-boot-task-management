@@ -65,28 +65,19 @@ public class TaskHandler {
 
     @PutMapping("/{id}")
     public ResponseEntity<CustomResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskRequest task) {
-        try {
-            Task item = new Task();
-            item.setTitle(task.getTitle());
-            item.setDescription(task.getDescription());
-            item.setPriorityLevelsId(task.getPriorityLevelsId());
-            item.setTaskStatusId(task.getTaskStatusId());
-            item.setId(id);
+        Task item = new Task();
+        item.setTitle(task.getTitle());
+        item.setDescription(task.getDescription());
+        item.setPriorityLevelsId(task.getPriorityLevelsId());
+        item.setTaskStatusId(task.getTaskStatusId());
+        item.setId(id);
 
-            Long updatedBy = 1844995683120058368L;
-            item.setUpdatedBy(updatedBy);
+        Long updatedBy = 1844995683120058368L;
+        item.setUpdatedBy(updatedBy);
 
-            taskUseCase.updateTask(item);
-            CustomResponse response = CustomResponse.responseSuccess("update task completed", null);
-            return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            CustomResponse errorResponse = CustomResponse.responseError("Invalid input: " + e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        } catch (Exception e) {
-            CustomResponse errorResponse = CustomResponse.responseError("An unexpected error occurred: " + e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
+        taskUseCase.updateTask(item);
+        CustomResponse response = CustomResponse.responseSuccess("update task completed", null);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
