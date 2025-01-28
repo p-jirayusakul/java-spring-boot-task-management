@@ -17,6 +17,7 @@ import java.util.List;
 @RequestMapping("/api/v1/task")
 public class TaskHandler {
     private final TaskUseCase taskUseCase;
+    private static final Long DEFAULT_USER_ID = 1844995683120058368L;
 
     public TaskHandler(TaskUseCase taskUseCase) {
         this.taskUseCase = taskUseCase;
@@ -25,32 +26,23 @@ public class TaskHandler {
     @GetMapping("")
     public ResponseEntity<CustomResponse> listTasks() {
         List<Task> items = taskUseCase.listTasks();
-        CustomResponse response = CustomResponse.responseSuccess("get list task completed", items);
-        return ResponseEntity.ok(response);
+        return createSuccessResponse("get list task completed", items);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CustomResponse> getTask(@PathVariable("id") Long id) {
         Task items = taskUseCase.getTask(id);
-        CustomResponse response = CustomResponse.responseSuccess("get task completed", items);
-        return ResponseEntity.ok(response);
+        return createSuccessResponse("get task completed", items);
     }
 
     @PostMapping("")
     public ResponseEntity<CustomResponse> createTask(@Valid @RequestBody TaskRequest taskRequest) {
-        Task task = new Task();
-        task.setTitle(taskRequest.getTitle());
-        task.setDescription(taskRequest.getDescription());
-        task.setPriorityLevelsId(taskRequest.getPriorityLevelsId());
-        task.setTaskStatusId(taskRequest.getTaskStatusId());
-
-        Long createdBy = 1844995683120058368L;
-        task.setCreatedBy(createdBy);
+        Task task = mapTaskFromRequest(taskRequest);
+        task.setCreatedBy(DEFAULT_USER_ID);
 
         TaskID id = taskUseCase.createTask(task);
         if (id == null) {
-            CustomResponse errorResponse = CustomResponse.responseError("Failed to create task");
-            return ResponseEntity.badRequest().body(errorResponse);
+            return createErrorResponse("Failed to create task");
         }
 
         URI location = ServletUriComponentsBuilder
@@ -59,32 +51,42 @@ public class TaskHandler {
                 .buildAndExpand(id.getId())
                 .toUri();
 
-        CustomResponse response = CustomResponse.responseSuccess("create task completed", id);
-        return ResponseEntity.created(location).body(response);
+        return ResponseEntity.created(location)
+                .body(CustomResponse.responseSuccess("create task completed", id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskRequest task) {
-        Task item = new Task();
-        item.setTitle(task.getTitle());
-        item.setDescription(task.getDescription());
-        item.setPriorityLevelsId(task.getPriorityLevelsId());
-        item.setTaskStatusId(task.getTaskStatusId());
-        item.setId(id);
+    public ResponseEntity<CustomResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskRequest taskRequest) {
+        Task task = mapTaskFromRequest(taskRequest);
+        task.setId(id);
+        task.setUpdatedBy(DEFAULT_USER_ID);
 
-        Long updatedBy = 1844995683120058368L;
-        item.setUpdatedBy(updatedBy);
-
-        taskUseCase.updateTask(item);
-        CustomResponse response = CustomResponse.responseSuccess("update task completed", null);
-        return ResponseEntity.ok(response);
+        taskUseCase.updateTask(task);
+        return createSuccessResponse("update task completed", null);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<CustomResponse> deleteTask(@PathVariable("id") Long id) {
         taskUseCase.deleteTask(id);
-        CustomResponse response = CustomResponse.responseSuccess("delete task completed", null);
+        return createSuccessResponse("delete task completed", null);
+    }
+
+    private Task mapTaskFromRequest(TaskRequest taskRequest) {
+        Task task = new Task();
+        task.setTitle(taskRequest.getTitle());
+        task.setDescription(taskRequest.getDescription());
+        task.setPriorityLevelsId(taskRequest.getPriorityLevelsId());
+        task.setTaskStatusId(taskRequest.getTaskStatusId());
+        return task;
+    }
+
+    private ResponseEntity<CustomResponse> createSuccessResponse(String message, Object data) {
+        CustomResponse response = CustomResponse.responseSuccess(message, data);
         return ResponseEntity.ok(response);
     }
 
+    private ResponseEntity<CustomResponse> createErrorResponse(String message) {
+        CustomResponse response = CustomResponse.responseError(message);
+        return ResponseEntity.badRequest().body(response);
+    }
 }
