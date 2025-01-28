@@ -1,4 +1,6 @@
 package org.workshop.task_management.internal.database;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,19 +30,18 @@ public class DatabaseConfig {
 
     @Bean
     public DataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
+        HikariConfig config = new HikariConfig();
 
-        // โหลดค่าจาก Environment Variables / .env.local
         String effectiveDbUrl = setenvOrDefault("DB_URL", dbUrl);
         String effectiveUsername = setenvOrDefault("DB_USERNAME", dbUsername);
         String effectivePassword = setenvOrDefault("DB_PASSWORD", dbPassword);
 
-        dataSource.setUrl(effectiveDbUrl != null ? effectiveDbUrl : dbUrl);
-        dataSource.setUsername(effectiveUsername != null ? effectiveUsername : dbUsername);
-        dataSource.setPassword(effectivePassword != null ? effectivePassword : dbPassword);
+        config.setJdbcUrl(effectiveDbUrl != null ? effectiveDbUrl : dbUrl);
+        config.setUsername(effectiveUsername != null ? effectiveUsername : dbUsername);
+        config.setPassword(effectivePassword != null ? effectivePassword : dbPassword);
+        config.setDriverClassName("org.postgresql.Driver");
 
-        return dataSource;
+        return new HikariDataSource(config);
     }
 
     private String setenvOrDefault(String key, String fallback) {
