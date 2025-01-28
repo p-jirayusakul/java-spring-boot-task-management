@@ -22,11 +22,7 @@ import java.util.List;
 public class LoggingFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingFilter.class);
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    private final List<String> ignoredEndpoints = List.of(
-            "/health-check"
-    );
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -97,9 +93,8 @@ public class LoggingFilter implements Filter {
         return ip;
     }
 
-
     private boolean shouldSkipLogging(String uri) {
-        return ignoredEndpoints.stream().anyMatch(pattern -> pathMatcher.match(pattern, uri));
+        return uri.equals("/api/v1/health-check/live") || uri.startsWith("/api/v1/health-check/ready");
     }
 
 }

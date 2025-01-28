@@ -11,7 +11,7 @@ x-postgres-env: &postgres-env
 
 services:
   db-postgres:
-    image: postgres:16.4
+    image: postgres:17.2
     restart: unless-stopped
     environment:
       <<: *postgres-env
@@ -59,11 +59,11 @@ services:
     networks:
       - my_network
 
-  api-task-management:
+  api-task-management-java-spring-boot:
     build:
       context: .
       dockerfile: Dockerfile
-    image: api-task-management:latest
+    image: api-task-management-java-spring-boot:latest
     restart: unless-stopped
     environment:
       DB_HOST: db-postgres
