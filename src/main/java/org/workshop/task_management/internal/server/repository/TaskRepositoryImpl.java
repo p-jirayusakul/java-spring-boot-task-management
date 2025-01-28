@@ -41,7 +41,7 @@ public class TaskRepositoryImpl implements TaskRepository {
                     )
             );
         } catch (DataAccessException e) {
-            logger.error("Error: {}", e.getMessage(), e);
+            logger.error("repository listTasks: {}", e.getMessage(), e);
             throw new RepositoryException(e.getMessage());
         }
     }
@@ -52,7 +52,7 @@ public class TaskRepositoryImpl implements TaskRepository {
         try {
             return jdbcTemplate.queryForObject(
                     sql,
-                    (rs, rowNum) -> new Task(
+                    (rs, _) -> new Task(
                             rs.getLong("id"),
                             rs.getString("title"),
                             rs.getString("description"),
@@ -69,7 +69,7 @@ public class TaskRepositoryImpl implements TaskRepository {
             if (e.getMessage().contains("Incorrect result size: expected 1, actual 0")) {
                 throw new NotFoundException("Task with ID " + id + " not found.");
             }
-            logger.error("Error: {}", e.getMessage(), e);
+            logger.error("repository getTask: {}", e.getMessage(), e);
             throw new RepositoryException(e.getMessage());
         }
     }
@@ -81,7 +81,7 @@ public class TaskRepositoryImpl implements TaskRepository {
             Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
             return count != null && count > 0;
         } catch (DataAccessException e) {
-            logger.error("Error while checking if task exists: {}", e.getMessage(), e);
+            logger.error("repository taskExists: {}", e.getMessage(), e);
             throw new RepositoryException(e.getMessage());
         }
     }
@@ -108,7 +108,7 @@ public class TaskRepositoryImpl implements TaskRepository {
                     task.getCreatedBy()
             );
         } catch (DataAccessException e) {
-            logger.error("Error while creating task: {}", e.getMessage(), e);
+            logger.error("repository createTask: {}", e.getMessage(), e);
             throw new RepositoryException(e.getMessage());
         }
     }
@@ -127,7 +127,7 @@ public class TaskRepositoryImpl implements TaskRepository {
                     task.getId()
             );
         } catch (DataAccessException e) {
-            logger.error("Error while updating task: {}", e.getMessage(), e);
+            logger.error("repository updateTask: {}", e.getMessage(), e);
             throw new RepositoryException(e.getMessage());
         }
     }
@@ -138,7 +138,7 @@ public class TaskRepositoryImpl implements TaskRepository {
         try {
             jdbcTemplate.update(sql, id);
         } catch (DataAccessException e) {
-            logger.error("Error while deleting task: {}", e.getMessage(), e);
+            logger.error("repository deleteTask: {}", e.getMessage(), e);
             throw new RepositoryException(e.getMessage());
         }
     }
