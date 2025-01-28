@@ -7,6 +7,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.workshop.task_management.internal.server.domain.entities.task.Task;
+import org.workshop.task_management.internal.server.domain.entities.task.TaskPriorityLevel;
+import org.workshop.task_management.internal.server.domain.entities.task.TaskStatus;
 import org.workshop.task_management.internal.server.domain.repositories.TaskRepository;
 import org.workshop.task_management.pkg.exceptions.NotFoundException;
 import org.workshop.task_management.pkg.exceptions.RepositoryException;
@@ -128,6 +130,38 @@ public class TaskRepositoryImpl implements TaskRepository {
             );
         } catch (DataAccessException e) {
             logger.error("repository updateTask: {}", e.getMessage(), e);
+            throw new RepositoryException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateTaskStatus(TaskStatus task) {
+        String sql = "UPDATE public.task SET task_status_id = ?, updated_by = ?, updated_at = NOW() WHERE id = ?;";
+        try {
+            jdbcTemplate.update(
+                    sql,
+                    task.getTaskStatusId(),
+                    task.getUpdatedBy(),
+                    task.getId()
+            );
+        } catch (DataAccessException e) {
+            logger.error("repository updateTaskStatus: {}", e.getMessage(), e);
+            throw new RepositoryException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateTaskPriorityLevel(TaskPriorityLevel task) {
+        String sql = "UPDATE public.task SET priority_levels_id = ?, updated_by = ?, updated_at = NOW() WHERE id = ?;";
+        try {
+            jdbcTemplate.update(
+                    sql,
+                    task.getPriorityLevelId(),
+                    task.getUpdatedBy(),
+                    task.getId()
+            );
+        } catch (DataAccessException e) {
+            logger.error("repository updateTaskPriorityLevel: {}", e.getMessage(), e);
             throw new RepositoryException(e.getMessage());
         }
     }

@@ -6,10 +6,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.workshop.task_management.internal.server.domain.entities.task.Task;
 import org.workshop.task_management.internal.server.domain.entities.task.TaskID;
+import org.workshop.task_management.internal.server.domain.entities.task.TaskPriorityLevel;
+import org.workshop.task_management.internal.server.domain.entities.task.TaskStatus;
 import org.workshop.task_management.internal.server.domain.use_case.TaskUseCase;
 import org.workshop.task_management.internal.server.request.TaskRequest;
+import org.workshop.task_management.internal.server.request.UpdateTaskPriorityLevelRequest;
+import org.workshop.task_management.internal.server.request.UpdateTaskStatusRequest;
 import org.workshop.task_management.pkg.middleware.response.CustomResponse;
-
 import java.net.URI;
 import java.util.List;
 
@@ -41,10 +44,6 @@ public class TaskHandler {
         task.setCreatedBy(DEFAULT_USER_ID);
 
         TaskID id = taskUseCase.createTask(task);
-        if (id == null) {
-            return createErrorResponse("Failed to create task");
-        }
-
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -63,6 +62,28 @@ public class TaskHandler {
 
         taskUseCase.updateTask(task);
         return createSuccessResponse("update task completed", null);
+    }
+
+    @PatchMapping("/{id}/task-status")
+    public ResponseEntity<CustomResponse> updateTaskStatus(@PathVariable("id") Long id, @Valid @RequestBody UpdateTaskStatusRequest taskRequest) {
+        TaskStatus taskStatus = new TaskStatus();
+        taskStatus.setId(id);
+        taskStatus.setTaskStatusId(taskRequest.getTaskStatusId());
+        taskStatus.setUpdatedBy(DEFAULT_USER_ID);
+
+        taskUseCase.updateTaskStatus(taskStatus);
+        return createSuccessResponse("update task status completed", null);
+    }
+
+    @PatchMapping("/{id}/priority-level")
+    public ResponseEntity<CustomResponse> updateTaskPriorityLevel(@PathVariable("id") Long id, @Valid @RequestBody UpdateTaskPriorityLevelRequest taskRequest) {
+        TaskPriorityLevel priorityLevel = new TaskPriorityLevel();
+        priorityLevel.setId(id);
+        priorityLevel.setPriorityLevelId(taskRequest.getPriorityLevelsId());
+        priorityLevel.setUpdatedBy(DEFAULT_USER_ID);
+
+        taskUseCase.updateTaskPriorityLevel(priorityLevel);
+        return createSuccessResponse("update task priority level completed", null);
     }
 
     @DeleteMapping("/{id}")
@@ -85,8 +106,5 @@ public class TaskHandler {
         return ResponseEntity.ok(response);
     }
 
-    private ResponseEntity<CustomResponse> createErrorResponse(String message) {
-        CustomResponse response = CustomResponse.responseError(message);
-        return ResponseEntity.badRequest().body(response);
-    }
+
 }
