@@ -41,8 +41,14 @@ public class TaskHandlerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
+    @MockitoBean
     private JwtUtil jwtUtil;
+
+    @BeforeEach
+    void setup() {
+        when(jwtUtil.generateToken(anyString())).thenReturn("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxODQ0OTk1NjgzMTIwMDU4MzY4IiwiZXhwIjoxNzM4MjU3OTA5LCJpYXQiOjE3MzgyMjE5MDl9.q8AZM7G_kizULJQmizic6rqXbx9qbrx2rCMw2GGbl1E");
+        when(jwtUtil.isTokenValid(anyString())).thenReturn("1844995683120058368");
+    }
 
     @Test
     void createTaskSuccessfully() throws Exception {
@@ -59,7 +65,7 @@ public class TaskHandlerTest {
 
 
         // ใช้ expectedToken ที่ Mock ไว้
-        String expectedToken = jwtUtil.generateToken("1844995683120058368");
+        String expectedToken = jwtUtil.generateToken(anyString());
         when(taskUseCase.createTask(any(Task.class))).thenReturn(mockTaskID);
 
         mockMvc.perform(post("/api/v1/task")

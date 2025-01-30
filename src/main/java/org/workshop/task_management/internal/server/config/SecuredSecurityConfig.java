@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 //import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -17,6 +18,9 @@ import org.workshop.task_management.pkg.middleware.security.JwtAuthenticationFil
 @EnableWebSecurity
 public class SecuredSecurityConfig {
 
+    final private String[] allowedPaths = { "api/v1/users/login", "api/v1/health-check/live", "/api/v1/health-check/ready" };
+    final private String[] securityPaths = { "/api/v1/task/**" };
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     public SecuredSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -25,11 +29,11 @@ public class SecuredSecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .securityMatcher("/api/v1/task/**")
+        http.csrf(AbstractHttpConfigurer::disable)
+                .securityMatcher(securityPaths)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("api/v1/users/login", "api/v1/health-check/live", "/api/v1/health-check/ready", "api/v1/master-data/**").permitAll()
+                        .requestMatchers(allowedPaths).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -40,16 +44,5 @@ public class SecuredSecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
-    }
-
-    @Bean
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        String[] allowedPaths = { "api/v1/users/login", "api/v1/health-check/live", "/api/v1/health-check/ready", "api/v1/master-data/**" };
-        http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(allowedPaths).permitAll()
-                        .anyRequest().authenticated()
-                );
-        return http.build();
     }
 }

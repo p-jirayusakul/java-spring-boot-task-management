@@ -17,14 +17,14 @@ public class HealthCheckHandler {
 
     @RequestMapping("/live")
     public ResponseEntity<String> liveness() {
-        return ResponseEntity.ok("Service is alive");
+        return ResponseEntity.ok("alive");
     }
 
     @RequestMapping("/ready")
     public ResponseEntity<String> readiness() {
         if (!this.healthCheckUseCase.readiness()) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Service is not ready");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("not ready");
         }
-        return ResponseEntity.ok("Service is ready");
+        return ResponseEntity.ok("ready");
     }
 }
