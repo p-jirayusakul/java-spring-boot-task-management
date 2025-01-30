@@ -2,6 +2,8 @@ package org.workshop.task_management.internal.server.handlers;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.workshop.task_management.internal.server.domain.entities.task.Task;
@@ -20,7 +22,6 @@ import java.util.List;
 @RequestMapping("/api/v1/task")
 public class TaskHandler {
     private final TaskUseCase taskUseCase;
-    private static final Long DEFAULT_USER_ID = 1844995683120058368L;
 
     public TaskHandler(TaskUseCase taskUseCase) {
         this.taskUseCase = taskUseCase;
@@ -40,8 +41,9 @@ public class TaskHandler {
 
     @PostMapping("")
     public ResponseEntity<CustomResponse> createTask(@Valid @RequestBody TaskRequest taskRequest) {
+        Long userID = getCurrentUserId();
         Task task = mapTaskFromRequest(taskRequest);
-        task.setCreatedBy(DEFAULT_USER_ID);
+        task.setCreatedBy(userID);
 
         TaskID id = taskUseCase.createTask(task);
         URI location = ServletUriComponentsBuilder
@@ -56,9 +58,10 @@ public class TaskHandler {
 
     @PutMapping("/{id}")
     public ResponseEntity<CustomResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskRequest taskRequest) {
+        Long userID = getCurrentUserId();
         Task task = mapTaskFromRequest(taskRequest);
         task.setId(id);
-        task.setUpdatedBy(DEFAULT_USER_ID);
+        task.setUpdatedBy(userID);
 
         taskUseCase.updateTask(task);
         return createSuccessResponse("update task completed", null);
@@ -66,10 +69,12 @@ public class TaskHandler {
 
     @PatchMapping("/{id}/task-status")
     public ResponseEntity<CustomResponse> updateTaskStatus(@PathVariable("id") Long id, @Valid @RequestBody UpdateTaskStatusRequest taskRequest) {
+        Long userID = getCurrentUserId();
+
         TaskStatus taskStatus = new TaskStatus();
         taskStatus.setId(id);
         taskStatus.setTaskStatusId(taskRequest.getTaskStatusId());
-        taskStatus.setUpdatedBy(DEFAULT_USER_ID);
+        taskStatus.setUpdatedBy(userID);
 
         taskUseCase.updateTaskStatus(taskStatus);
         return createSuccessResponse("update task status completed", null);
@@ -77,10 +82,12 @@ public class TaskHandler {
 
     @PatchMapping("/{id}/priority-level")
     public ResponseEntity<CustomResponse> updateTaskPriorityLevel(@PathVariable("id") Long id, @Valid @RequestBody UpdateTaskPriorityLevelRequest taskRequest) {
+        Long userID = getCurrentUserId();
+
         TaskPriorityLevel priorityLevel = new TaskPriorityLevel();
         priorityLevel.setId(id);
         priorityLevel.setPriorityLevelId(taskRequest.getPriorityLevelsId());
-        priorityLevel.setUpdatedBy(DEFAULT_USER_ID);
+        priorityLevel.setUpdatedBy(userID);
 
         taskUseCase.updateTaskPriorityLevel(priorityLevel);
         return createSuccessResponse("update task priority level completed", null);
@@ -105,6 +112,22 @@ public class TaskHandler {
         CustomResponse response = CustomResponse.responseSuccess(message, data);
         return ResponseEntity.ok(response);
     }
+
+    private Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof String) {
+                try {
+                    return Long.parseLong((String) principal);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
 
 
 }
