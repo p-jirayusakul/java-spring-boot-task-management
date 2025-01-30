@@ -71,4 +71,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
+    @ExceptionHandler(UnAuthorization.class)
+    public ResponseEntity<CustomResponse> handleUnAuthorizationException(UnAuthorization ex, WebRequest request) {
+        CustomResponse errorResponse = CustomResponse.responseError(ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
 }
