@@ -22,7 +22,6 @@ public class CustomResponse {
         return new CustomResponse("error", message, null);
     }
 
-
     public String getStatus() {
         return status;
     }

@@ -26,23 +26,23 @@ public class JwtUtil {
         Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10); // Token valid for 10 hours
         return Jwts.builder()
                 .claim("sub", userID)
-                .expiration(expiration) // a java.util.Date
-                .issuedAt(new Date()) // for example, now
+                .expiration(expiration)
+                .issuedAt(new Date())
                 .signWith(SECRET_KEY_INSTANCE)
                 .compact();
     }
 
-    public boolean isTokenValid(String token) {
+    public String isTokenValid(String token) {
         try {
             String secretKey = environment.getProperty("JWT_SECRET");
             SecretKey secretKeyInstance = Keys.hmacShaKeyFor(Objects.requireNonNull(secretKey).getBytes());
-            Jwts.parser()
-                    .verifyWith(secretKeyInstance) // <----
+            return Jwts.parser()
+                    .verifyWith(secretKeyInstance)
                     .build()
-                    .parseSignedClaims(token);
-            return true;
+                    .parseSignedClaims(token)
+                    .getPayload().getSubject();
         } catch (Exception e) {
-            return false;
+            return "";
         }
     }
 }

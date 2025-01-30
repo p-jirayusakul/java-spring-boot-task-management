@@ -31,7 +31,7 @@ public class UsersUseCaseImpl implements UsersUseCase {
             throw new UnAuthorization("invalid credentials");
         }
 
-        String token = jwtUtil.generateToken(user.getId().toString()); // ใช้ user.getId() ในการสร้าง Token
+        String token = jwtUtil.generateToken(user.getId().toString());
         return new Token(token);
     }
 }
