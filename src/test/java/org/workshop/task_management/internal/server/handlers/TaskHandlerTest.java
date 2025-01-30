@@ -6,16 +6,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.cdimascio.dotenv.Dotenv;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.workshop.task_management.internal.server.domain.entities.task.Task;
 import org.workshop.task_management.internal.server.domain.entities.task.TaskID;
 import org.workshop.task_management.internal.server.domain.use_case.TaskUseCase;
 import org.workshop.task_management.internal.server.request.TaskRequest;
+import org.workshop.task_management.pkg.middleware.security.JwtUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +27,9 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @WebMvcTest(TaskHandler.class)
+@TestPropertySource(properties = {
+        "JWT_SECRET=NhfWytDIzKNteB5zChVsYBYL99Yed4Cx"
+})
 public class TaskHandlerTest {
 
     @Autowired
@@ -34,8 +41,12 @@ public class TaskHandlerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @Test
     void createTaskSuccessfully() throws Exception {
+
         TaskRequest taskRequest = new TaskRequest(
                 "Task Title",
                 "Task Description",
@@ -46,9 +57,13 @@ public class TaskHandlerTest {
         TaskID mockTaskID = new TaskID();
         mockTaskID.setId(1L);
 
+
+        // ใช้ expectedToken ที่ Mock ไว้
+        String expectedToken = jwtUtil.generateToken("1844995683120058368");
         when(taskUseCase.createTask(any(Task.class))).thenReturn(mockTaskID);
 
         mockMvc.perform(post("/api/v1/task")
+                        .header("Authorization", "Bearer " + expectedToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(taskRequest)))
                 .andExpect(status().isCreated())

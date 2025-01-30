@@ -10,18 +10,18 @@ import java.util.Objects;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.core.env.Environment;
 
 @Component
 public class JwtUtil {
 
-    @Autowired
-    private Environment environment;
+    @Value("${JWT_SECRET}") // ดึงค่า JWT_SECRET จาก application.properties
+    private String secretKey;
 
     public String generateToken(String userID) {
-        String secretKey = environment.getProperty("JWT_SECRET");
-
+        System.out.println("secretKey " + secretKey);
         Key SECRET_KEY_INSTANCE = Keys.hmacShaKeyFor(Objects.requireNonNull(secretKey).getBytes());
         Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10); // Token valid for 10 hours
         return Jwts.builder()
@@ -34,7 +34,6 @@ public class JwtUtil {
 
     public String isTokenValid(String token) {
         try {
-            String secretKey = environment.getProperty("JWT_SECRET");
             SecretKey secretKeyInstance = Keys.hmacShaKeyFor(Objects.requireNonNull(secretKey).getBytes());
             return Jwts.parser()
                     .verifyWith(secretKeyInstance)
